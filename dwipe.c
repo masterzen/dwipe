@@ -489,11 +489,17 @@ int main( int argc, char** argv )
 
 	dwipe_log( DWIPE_LOG_NOTICE, "Wipe finished." );
 
-	for( i = 0 ; i < dwipe_selected ; i++ )
+	for( i = 0 ; i < dwipe_enumerated ; i++ )
 	{
-		snprintf( dwipe_result_file, sizeof(dwipe_result_file), "%s.result", c2[i].device_name );
+		snprintf( dwipe_result_file, sizeof(dwipe_result_file), "%s.result", c1[i].device_name );
 		dwipe_result_fp = fopen( dwipe_result_file, "w" );
-		fprintf( dwipe_result_fp, "DWIPE_LABEL='%s'\n", c2[i].label );
+		fprintf( dwipe_result_fp, "DWIPE_LABEL='%s'\n", c1[i].label );
+		if( c1[i].select != DWIPE_SELECT_TRUE )
+		{
+			fprintf( dwipe_result_fp, "DWIPE_RESULT='skipped'\n" );
+			fclose( dwipe_result_fp );
+			continue;
+		}
 		fprintf( dwipe_result_fp, "DWIPE_METHOD='%s'\n", dwipe_method_label( dwipe_options.method) );
 		fprintf( dwipe_result_fp, "DWIPE_ROUNDS='%i'\n", dwipe_options.rounds );
 		
@@ -510,21 +516,21 @@ int main( int argc, char** argv )
 			fprintf( dwipe_result_fp, "DWIPE_VERIFY='last'\n" );
 		}
 		
-		if( c2[i].result < 0 )
+		if( c1[i].result < 0 )
 		{
-			dwipe_log( DWIPE_LOG_NOTICE, "Wipe of device '%s' failed.", c2[i].device_name );
+			dwipe_log( DWIPE_LOG_NOTICE, "Wipe of device '%s' failed.", c1[i].device_name );
 			fprintf( dwipe_result_fp, "DWIPE_RESULT='fail'\n" );
 		}
 
-		if( c2[i].result == 0 )
+		if( c1[i].result == 0 )
 		{
-			dwipe_log( DWIPE_LOG_NOTICE, "Wipe of device '%s' succeeded.", c2[i].device_name );
+			dwipe_log( DWIPE_LOG_NOTICE, "Wipe of device '%s' succeeded.", c1[i].device_name );
 			fprintf( dwipe_result_fp, "DWIPE_RESULT='pass'\n" );
 		}
 
-		if( c2[i].result > 0 )
+		if( c1[i].result > 0 )
 		{
-			dwipe_log( DWIPE_LOG_NOTICE, "Wipe of device '%s' incomplete.", c2[i].device_name );
+			dwipe_log( DWIPE_LOG_NOTICE, "Wipe of device '%s' incomplete.", c1[i].device_name );
 			fprintf( dwipe_result_fp, "DWIPE_RESULT='fail'\n" );
 		}
 		
