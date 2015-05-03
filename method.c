@@ -545,6 +545,7 @@ int dwipe_runmethod( DWIPE_METHOD_SIGNATURE, dwipe_pattern_t* patterns )
 	c->round_size = c->round_count * c->pass_size;
 
 	/* The final pass is always a zero fill, except ops2 which is random. */
+	c->pass_count++;
 	c->round_size += c->device_size;
 
 	if( dwipe_options.verify == DWIPE_VERIFY_LAST || dwipe_options.verify == DWIPE_VERIFY_ALL )
@@ -571,7 +572,8 @@ int dwipe_runmethod( DWIPE_METHOD_SIGNATURE, dwipe_pattern_t* patterns )
 		/* Initialize the working pass counter. */
 		c->pass_working = 0;
 
-		for( i = 0 ; i < c->pass_count ; i++ )
+		/* Remove 1 from pass_count as it includes the final blanking pass (fix for cosmetic issue on quick erase: pass 0 of 0) */
+		for( i = 0 ; i < (c->pass_count - 1) ; i++ )
 		{
 			/* Increment the working pass. */
 			c->pass_working += 1;
@@ -677,6 +679,10 @@ int dwipe_runmethod( DWIPE_METHOD_SIGNATURE, dwipe_pattern_t* patterns )
 	
 	} /* while rounds */
 
+
+
+	/* Count blanking pass as a separate pass */
+	c->pass_working++;
 
 	if( dwipe_options.method == &dwipe_ops2 )
 	{
