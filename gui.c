@@ -1453,7 +1453,7 @@ void dwipe_gui_status( int count, dwipe_context_t* c )
 	char* dwipe_tera = "%llu TB/s";
 	char* dwipe_giga = "%llu GB/s";
 	char* dwipe_mega = "%llu MB/s";
-	char* dwipe_kilo = "%llu KB/s";
+	char* dwipe_kilo = "%llu kB/s";
 	char* dwipe_unit = "%llu B/s";
 
 	/* The throughput format pointer. */
@@ -1668,14 +1668,15 @@ void dwipe_gui_status( int count, dwipe_context_t* c )
 
   		if( c[i].sync_status   ) { wprintw( main_window, "[syncing] "   ); }
 
-		     if( c[i].throughput >= INT64_C( 1000000000000000 ) )
-			    { wprintw( main_window, "[%llu TB/s] ", c[i].throughput / INT64_C( 1000000000000 ) ); }
-		else if( c[i].throughput >= INT64_C( 1000000000000    ) )
-		       { wprintw( main_window, "[%llu GB/s] ", c[i].throughput / INT64_C( 1000000000    ) ); }
-		else if( c[i].throughput >= INT64_C( 1000000000       ) )
-		       { wprintw( main_window, "[%llu MB/s] ", c[i].throughput / INT64_C( 1000000       ) ); }
-		else if( c[i].throughput >= INT64_C( 1000000          ) )
-		       { wprintw( main_window, "[%llu KB/s] ", c[i].throughput / INT64_C( 1000          ) ); }
+
+		     if( c[i].throughput >= INT64_C( 1000000000000 ) )
+			    { wprintw( main_window, "[%llu TB/s] ", c[i].throughput / INT64_C( 1099511627776 ) ); }
+		else if( c[i].throughput >= INT64_C( 1000000000    ) )
+		       { wprintw( main_window, "[%llu GB/s] ", c[i].throughput / INT64_C( 1073741824    ) ); }
+		else if( c[i].throughput >= INT64_C( 100000       ) )
+		       { wprintw( main_window, "[%llu MB/s] ", c[i].throughput / INT64_C( 1048576       ) ); }
+		else if( c[i].throughput >= INT64_C( 1000          ) )
+		       { wprintw( main_window, "[%llu kB/s] ", c[i].throughput / INT64_C( 1024          ) ); }
 		else
 		       { wprintw( main_window, "[%llu B/s] ",  c[i].throughput / INT64_C( 1             ) ); }
 
@@ -1707,16 +1708,16 @@ void dwipe_gui_status( int count, dwipe_context_t* c )
 	dwipe_gui_load();
 
 
-	     if( dwipe_throughput >= INT64_C( 1000000000000000 ) )
-		    { dwipe_throughput /= INT64_C( 1000000000000    ); dwipe_format = dwipe_tera; }
-	else if( dwipe_throughput >= INT64_C( 1000000000000    ) )
-	       { dwipe_throughput /= INT64_C( 1000000000       ); dwipe_format = dwipe_giga; }
-	else if( dwipe_throughput >= INT64_C( 1000000000       ) )
-	       { dwipe_throughput /= INT64_C( 1000000          ); dwipe_format = dwipe_mega; }
-	else if( dwipe_throughput >= INT64_C( 1000000          ) )
-	       { dwipe_throughput /= INT64_C( 1000             ); dwipe_format = dwipe_kilo; }
+	     if( dwipe_throughput >= INT64_C( 1000000000000 ) )
+		    { dwipe_throughput /= INT64_C( 1099511627776 ); dwipe_format = dwipe_tera; }
+	else if( dwipe_throughput >= INT64_C( 1000000000    ) )
+	       { dwipe_throughput /= INT64_C( 1073741824       ); dwipe_format = dwipe_giga; }
+	else if( dwipe_throughput >= INT64_C( 100000        ) )
+	       { dwipe_throughput /= INT64_C( 1048576          ); dwipe_format = dwipe_mega; }
+	else if( dwipe_throughput >= INT64_C( 1000          ) )
+	       { dwipe_throughput /= INT64_C( 1024             ); dwipe_format = dwipe_kilo; }
 	else
-	       { dwipe_throughput /= INT64_C( 1                ); dwipe_format = dwipe_unit; }
+	       { dwipe_format = dwipe_unit; }
 
 	/* Print the combined throughput. */
 	mvwprintw( stats_window, DWIPE_GUI_STATS_THROUGHPUT_Y, DWIPE_GUI_STATS_THROUGHPUT_X, "Throughput:" );
