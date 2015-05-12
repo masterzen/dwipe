@@ -1207,6 +1207,8 @@ void dwipe_gui_verify( void )
 
 } /* dwipe_gui_verify */
 
+
+
 void dwipe_gui_configuration( void )
 {
 	/* Create the configuration menu */
@@ -1221,40 +1223,82 @@ void dwipe_gui_configuration( void )
 		wattron( config_window, COLOR_PAIR(7) );
 	}
 
+	int selected_item = COLOR_PAIR(1);
+	int normal_item = COLOR_PAIR(7);
+
 	/* Clear the config window. */
 	werase( config_window );
 	/* Add a border. */
 	box(config_window, 0, 0);
 
-	/* Refresh window. */
-	wrefresh(config_window);
+
+	static struct dwipe_menu_items items[] = {
+			{1, "PRNG                   "},
+			{2, "Method                 "},
+			{3, "Verify                 "},
+			{4, "Rounds                 "},
+			{5, "Toggle fingerprinting  "},
+			{0, "Continue               "}
+		};
 
 
 	int keystroke;
 	int tab1 = 2; // Starting column for headings
 	int tab2 = 5; // Starting column for menu
 	int row = 4; // Starting row for menu
-
-	mvwprintw(config_window, 2, tab1, "Settings:");
-	mvwprintw(config_window, row, tab2, "1) PRNG");
-	mvwprintw(config_window, row + 1, tab2, "2) Method");
-	mvwprintw(config_window, row + 2, tab2, "3) Verify");
-	mvwprintw(config_window, row + 3, tab2, "4) Rounds");
-	mvwprintw(config_window, row + 4, tab2, "5) Toggle fingerprinting");
-
-
-	mvwprintw(config_window, row + 6, tab2, "0) Continue");
-	wrefresh(config_window);
+	int focus = -1; // Currently selected item
+	int count = sizeof(items) / sizeof(items[0]); // Number of items
 
 	do {
+		werase(config_window);
+		mvwprintw(config_window, 2, tab1, "Settings:");
+
+		int i = 0;
+		for (i = 0; i < count; i++) {
+			if (focus == i) wattron(config_window, selected_item); // Highlight this line
+			mvwprintw(config_window, row + i, tab2, "%d) %s", items[i].number, items[i].text);
+			if (focus == i) wattron(config_window, normal_item); // Reset colour
+		}
+
+		/* Refresh Window */
+		wrefresh(config_window);
+
+		keystroke = getch();
 		switch (keystroke) {
+			case KEY_DOWN:
+			case 'j':
+			case 'J':
+				if (focus < count - 1) focus++;
+			break;
+			case KEY_UP:
+			case 'k':
+			case 'K':
+				if (focus > 0) focus--;
+			break;
+			case KEY_ENTER:
+			case ' ':
+			case 10:
+				if (focus > -1) {
+					int i = 0;
+					for (i = 0; i < count; i++) {
+						if (focus == i) {
+							keystroke = '0' + items[i].number;
+						}
+					}
+				}
+			break;
+		}
+
+		switch (keystroke) {
+			case '1':
+				dwipe_gui_prng();
+			break;
 			case '5':
 				dwipe_options.fingerprint = !dwipe_options.fingerprint;
 				dwipe_gui_options();
 			break;
 		}
-	} while ((keystroke = getch()) != '0');
-
+	} while (keystroke != '0');
 
 	delwin(config_window);
 } /* dwipe_gui_configuration */

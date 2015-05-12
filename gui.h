@@ -35,6 +35,12 @@ void dwipe_gui_configuration( void );                    /* Configuration menu. 
 
 void dwipe_update_speedring( dwipe_speedring_t* speedring, u64 speedring_done, time_t speedring_now );
 
+
+struct dwipe_menu_items {
+	int number;
+	const char *text;
+};
+
 #endif /* GUI_H_ */
 
 /* eof */
