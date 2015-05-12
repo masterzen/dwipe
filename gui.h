@@ -41,6 +41,8 @@ struct dwipe_menu_items {
 	const char *text;
 };
 
+void refresh_all_windows();
+
 #endif /* GUI_H_ */
 
 /* eof */

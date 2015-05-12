@@ -1086,6 +1086,105 @@ void dwipe_gui_verify( void )
  *
  */
 
+	int keystroke;
+
+	/* Create Window */
+	WINDOW* win;
+
+#define DWIPE_GUI_VERIFY_H 40
+#define DWIPE_GUI_VERIFY_W 80
+#define DWIPE_GUI_VERIFY_Y (LINES - DWIPE_GUI_VERIFY_H) / 2
+#define DWIPE_GUI_VERIFY_X (COLS - DWIPE_GUI_VERIFY_W) / 2
+	win = newwin( DWIPE_GUI_VERIFY_H, DWIPE_GUI_VERIFY_W, DWIPE_GUI_VERIFY_Y, DWIPE_GUI_VERIFY_X );
+
+	int selected_item = COLOR_PAIR(1);
+	int normal_item = COLOR_PAIR(7);
+	
+	/* Set the initial focus. */
+	int focus = dwipe_options.verify;
+	
+	if( has_colors() )
+	{
+		/* Set the background style. */
+		wbkgdset( win, COLOR_PAIR(7) | ' ' );
+
+		/* Apply the color change. */
+		wattron( win, COLOR_PAIR(7) );
+	}
+
+	/* Clear the window. */
+	werase( win );
+	/* Add a border. */
+	box(win, 0, 0);
+
+	wrefresh(win);
+
+
+	static struct dwipe_menu_items items[] = {
+			{1, "Verification Off "},
+			{2, "Verify Last Pass "},
+			{3, "Verify All Passes"},
+		};
+	int count = sizeof(items) / sizeof(items[0]); // Number of items
+
+
+	int tab1 = 2; // Starting column for headings
+	int tab2 = 5; // Starting column for menu
+	int help_row = 15; // Starting row for help
+	int row = 4; // Starting row for menu
+
+	
+	bool breakLoop = false;
+
+	while (!breakLoop) {
+		werase(win);
+		mvwprintw(win, 2, tab1, "Verification:");
+
+		int i = 0;
+		for (i = 0; i < count; i++) {
+			if (focus == i) wattron(win, selected_item);
+			mvwprintw(win, row + i, tab2, "%d) %s", items[i].number, items[i].text);
+			if (focus == i) wattron(win, normal_item);
+		}
+
+		/* Refresh Window */
+		wrefresh(win);
+
+		keystroke = getch();
+		switch (keystroke) {
+			case KEY_DOWN:
+			case 'j':
+			case 'J':
+				if (focus < count - 1) focus++;
+			break;
+			case KEY_UP:
+			case 'k':
+			case 'K':
+				if (focus > 0) focus--;
+			break;
+			case KEY_ENTER:
+			case ' ':
+			case 10: {
+				int i = 0;
+				for (i = 0; i < count; i++) {
+					if (focus == i) {
+						breakLoop = true;
+					}
+				}
+			}
+			break;
+		}
+	}
+	
+	dwipe_options.verify = focus;
+
+	werase(win);
+	delwin(win);
+
+	refresh_all_windows();
+
+#if 0	
+	
 	/* The number of definitions in the dwipe_verify_t enumeration. */
 	const int count = 3;
 
@@ -1103,7 +1202,7 @@ void dwipe_gui_verify( void )
 
 	/* Input buffer. */
 	int keystroke;
-
+	
 	/* Update the footer window. */
 	werase( footer_window );
 	dwipe_gui_title( footer_window, dwipe_buttons2 );
@@ -1204,7 +1303,7 @@ void dwipe_gui_verify( void )
 		} /* switch */
 		
 	} /* while */
-
+#endif
 } /* dwipe_gui_verify */
 
 
@@ -1293,11 +1392,16 @@ void dwipe_gui_configuration( void )
 			case '1':
 				dwipe_gui_prng();
 			break;
+			case '3':
+				dwipe_gui_verify();
+			break;
 			case '5':
 				dwipe_options.fingerprint = !dwipe_options.fingerprint;
-				dwipe_gui_options();
 			break;
 		}
+
+		refresh_all_windows();
+		dwipe_gui_options();
 	} while (keystroke != '0');
 
 	delwin(config_window);
@@ -1933,6 +2037,29 @@ void dwipe_update_speedring( dwipe_speedring_t* speedring, u64 speedring_bytes, 
 	{
 		speedring->position = 0;
 	}
+}
+
+void refresh_all_windows() {
+	touchwin(stdscr);
+	refresh();
+
+	touchwin(header_window);
+	wrefresh(header_window);
+
+	touchwin(options_window);
+	wrefresh(options_window);
+
+	touchwin(stats_window);
+	wrefresh(stats_window);
+
+	touchwin(main_window);
+	wrefresh(main_window);
+
+	touchwin(config_window);
+	wrefresh(config_window);
+
+	touchwin(footer_window);
+	wrefresh(footer_window);
 }
 
 /* eof */
