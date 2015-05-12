@@ -31,6 +31,7 @@ void dwipe_gui_options( void );                          /* Update the options w
 void dwipe_gui_prng( void );                             /* Change the prng option.    */
 void dwipe_gui_rounds( void );                           /* Change the rounds option.  */
 void dwipe_gui_verify( void );                           /* Change the verify option.  */
+void dwipe_gui_configuration( void );                    /* Configuration menu.        */
 
 void dwipe_update_speedring( dwipe_speedring_t* speedring, u64 speedring_done, time_t speedring_now );
 

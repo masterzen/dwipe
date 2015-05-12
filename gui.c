@@ -103,6 +103,12 @@
 #define DWIPE_GUI_MAIN_Y  9
 #define DWIPE_GUI_MAIN_X  0
 
+/* Configuration window: width, height, x coordinate, y coordinate. */
+#define DWIPE_GUI_CONFIG_W 40
+#define DWIPE_GUI_CONFIG_H 15
+#define DWIPE_GUI_CONFIG_Y (LINES - DWIPE_GUI_CONFIG_H) / 2
+#define DWIPE_GUI_CONFIG_X (COLS - DWIPE_GUI_CONFIG_W) / 2
+
 
 /* Window pointers. */
 WINDOW* footer_window;
@@ -110,6 +116,7 @@ WINDOW* header_window;
 WINDOW* main_window;
 WINDOW* options_window;
 WINDOW* stats_window;
+WINDOW* config_window;
 
 
 /* Options window title. */
@@ -193,6 +200,9 @@ void dwipe_gui_init( void )
 
 		/* Set white on green for failure messages. */
 		init_pair( 6, COLOR_WHITE, COLOR_RED );
+
+		/* White on black for configuration menu */
+		init_pair(7, COLOR_WHITE, COLOR_BLACK);
 
 		/* Set the background style. */
 		wbkgdset( stdscr, COLOR_PAIR(1) | ' ' );
@@ -322,6 +332,7 @@ void dwipe_gui_free( void )
 	delwin( main_window    );
 	delwin( options_window );
 	delwin( stats_window   );
+	delwin( config_window  );
 	endwin();
 
 } /* dwipe_gui_free */
@@ -710,6 +721,11 @@ void dwipe_gui_select( int count, dwipe_context_t* c )
 			case 'F':
 				/* Toggle fingerprinting */
 				dwipe_options.fingerprint = !dwipe_options.fingerprint;
+				break;
+			case 'c':
+			case 'C':
+				/* Show configuration menu */
+				dwipe_gui_configuration();
 				break;
 
 		} /* keystroke switch */
@@ -1190,6 +1206,58 @@ void dwipe_gui_verify( void )
 	} /* while */
 
 } /* dwipe_gui_verify */
+
+void dwipe_gui_configuration( void )
+{
+	/* Create the configuration menu */
+	config_window = newwin( DWIPE_GUI_CONFIG_H, DWIPE_GUI_CONFIG_W, DWIPE_GUI_CONFIG_Y, DWIPE_GUI_CONFIG_X );
+
+	if( has_colors() )
+	{
+		/* Set the background style. */
+		wbkgdset( config_window, COLOR_PAIR(7) | ' ' );
+
+		/* Apply the color change. */
+		wattron( config_window, COLOR_PAIR(7) );
+	}
+
+	/* Clear the config window. */
+	werase( config_window );
+	/* Add a border. */
+	box(config_window, 0, 0);
+
+	/* Refresh window. */
+	wrefresh(config_window);
+
+
+	int keystroke;
+	int tab1 = 2; // Starting column for headings
+	int tab2 = 5; // Starting column for menu
+	int row = 4; // Starting row for menu
+
+	mvwprintw(config_window, 2, tab1, "Settings:");
+	mvwprintw(config_window, row, tab2, "1) PRNG");
+	mvwprintw(config_window, row + 1, tab2, "2) Method");
+	mvwprintw(config_window, row + 2, tab2, "3) Verify");
+	mvwprintw(config_window, row + 3, tab2, "4) Rounds");
+	mvwprintw(config_window, row + 4, tab2, "5) Toggle fingerprinting");
+
+
+	mvwprintw(config_window, row + 6, tab2, "0) Continue");
+	wrefresh(config_window);
+
+	do {
+		switch (keystroke) {
+			case '5':
+				dwipe_options.fingerprint = !dwipe_options.fingerprint;
+				dwipe_gui_options();
+			break;
+		}
+	} while ((keystroke = getch()) != '0');
+
+
+	delwin(config_window);
+} /* dwipe_gui_configuration */
 
 
 
