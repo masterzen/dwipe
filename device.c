@@ -24,8 +24,6 @@
 #include "context.h"
 #include "method.h"
 #include "options.h"
-#include "identify.h"
-#include "scsicmds.h"
 
 
 static int disk_count = 0;
