@@ -74,6 +74,9 @@ int dwipe_options_parse( int argc, char** argv )
 		/* Verify that wipe patterns are being written to the device. */
 		{ "verify", required_argument, 0, 0 },
 
+		/* Disable fingerprinting */
+		{ "no-fingerprint", no_argument, 0, 0},
+
 		/* Requisite padding for getopt(). */
 		{ 0, 0, 0, 0 }
 	};
@@ -101,6 +104,7 @@ int dwipe_options_parse( int argc, char** argv )
 	dwipe_options.rounds   = 1;
 	dwipe_options.sync     = 0;
 	dwipe_options.verify   = DWIPE_VERIFY_LAST;
+	dwipe_options.fingerprint = true;
 
 
 	/* Parse command line options. */
@@ -125,6 +129,12 @@ int dwipe_options_parse( int argc, char** argv )
 				if( strcmp( dwipe_options_long[i].name, "sync" ) == 0 )
 				{
 					dwipe_options.sync = 1;
+					break;
+				}
+
+				if( strcmp( dwipe_options_long[i].name, "no-fingerprint" ) == 0 )
+				{
+					dwipe_options.fingerprint = false;
 					break;
 				}
 
@@ -263,36 +273,37 @@ void dwipe_options_log( void )
 
 	if( dwipe_options.autonuke )
 	{
-		dwipe_log( DWIPE_LOG_NOTICE, "  autonuke = %i (on)", dwipe_options.autonuke );
+		dwipe_log( DWIPE_LOG_NOTICE, "  autonuke    = %i (on)", dwipe_options.autonuke );
 	}
 
 	else
 	{
-		dwipe_log( DWIPE_LOG_NOTICE, "  autonuke = %i (off)", dwipe_options.autonuke );
+		dwipe_log( DWIPE_LOG_NOTICE, "  autonuke    = %i (off)", dwipe_options.autonuke );
 	}
 
 
-	dwipe_log( DWIPE_LOG_NOTICE, "  banner   = %s", dwipe_options.banner );
-	dwipe_log( DWIPE_LOG_NOTICE, "  method   = %s", dwipe_method_label( dwipe_options.method ) );
-	dwipe_log( DWIPE_LOG_NOTICE, "  rounds   = %i", dwipe_options.rounds );
-	dwipe_log( DWIPE_LOG_NOTICE, "  sync     = %i", dwipe_options.sync );
+	dwipe_log( DWIPE_LOG_NOTICE, "  banner      = %s", dwipe_options.banner );
+	dwipe_log( DWIPE_LOG_NOTICE, "  method      = %s", dwipe_method_label( dwipe_options.method ) );
+	dwipe_log( DWIPE_LOG_NOTICE, "  rounds      = %i", dwipe_options.rounds );
+	dwipe_log( DWIPE_LOG_NOTICE, "  sync        = %i", dwipe_options.sync );
+	dwipe_log( DWIPE_LOG_NOTICE, "  fingerprint = %s", (dwipe_options.fingerprint ? "On" : "Off"));
 
 	switch( dwipe_options.verify )
 	{
 		case DWIPE_VERIFY_NONE:
-			dwipe_log( DWIPE_LOG_NOTICE, "  verify   = %i (off)", dwipe_options.verify );
+			dwipe_log( DWIPE_LOG_NOTICE, "  verify      = %i (off)", dwipe_options.verify );
 			break;
 
 		case DWIPE_VERIFY_LAST:
-			dwipe_log( DWIPE_LOG_NOTICE, "  verify   = %i (last pass)", dwipe_options.verify );
+			dwipe_log( DWIPE_LOG_NOTICE, "  verify      = %i (last pass)", dwipe_options.verify );
 			break;
 
 		case DWIPE_VERIFY_ALL:
-			dwipe_log( DWIPE_LOG_NOTICE, "  verify   = %i (all passes)", dwipe_options.verify );
+			dwipe_log( DWIPE_LOG_NOTICE, "  verify      = %i (all passes)", dwipe_options.verify );
 			break;
 
 		default:
-			dwipe_log( DWIPE_LOG_NOTICE, "  verify   = %i", dwipe_options.verify );
+			dwipe_log( DWIPE_LOG_NOTICE, "  verify      = %i", dwipe_options.verify );
 			break;
 	}
 

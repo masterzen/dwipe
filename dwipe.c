@@ -502,6 +502,7 @@ int main( int argc, char** argv )
 		}
 		fprintf( dwipe_result_fp, "DWIPE_METHOD='%s'\n", dwipe_method_label( dwipe_options.method) );
 		fprintf( dwipe_result_fp, "DWIPE_ROUNDS='%i'\n", dwipe_options.rounds );
+		fprintf( dwipe_result_fp, "DWIPE_FINGERPRINT='%d'\n", dwipe_options.fingerprint);
 		
 		if( dwipe_options.verify == DWIPE_VERIFY_NONE )
 		{

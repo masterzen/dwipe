@@ -53,7 +53,7 @@
 
 /* Options window: width, height, x coorindate, y coordinate. */
 #define DWIPE_GUI_OPTIONS_W   44
-#define DWIPE_GUI_OPTIONS_H   7
+#define DWIPE_GUI_OPTIONS_H   8
 #define DWIPE_GUI_OPTIONS_Y   1
 #define DWIPE_GUI_OPTIONS_X   0
 
@@ -61,18 +61,25 @@
 #define DWIPE_GUI_OPTIONS_TAB        10
 #define DWIPE_GUI_OPTIONS_ENTROPY_Y  1
 #define DWIPE_GUI_OPTIONS_ENTROPY_X  1
+
 #define DWIPE_GUI_OPTIONS_PRNG_Y     2
 #define DWIPE_GUI_OPTIONS_PRNG_X     1
+
 #define DWIPE_GUI_OPTIONS_METHOD_Y   3
 #define DWIPE_GUI_OPTIONS_METHOD_X   1
+
 #define DWIPE_GUI_OPTIONS_VERIFY_Y   4
 #define DWIPE_GUI_OPTIONS_VERIFY_X   1
-#define DWIPE_GUI_OPTIONS_ROUNDS_Y   5
+
+#define DWIPE_GUI_OPTIONS_FINGERPRINT_Y 5
+#define DWIPE_GUI_OPTIONS_FINGERPRINT_X 1
+
+#define DWIPE_GUI_OPTIONS_ROUNDS_Y   6
 #define DWIPE_GUI_OPTIONS_ROUNDS_X   1
 
 /* Stats window: width, height, x coordinate, y coordinate. */
 #define DWIPE_GUI_STATS_W 36
-#define DWIPE_GUI_STATS_H 7
+#define DWIPE_GUI_STATS_H 8
 #define DWIPE_GUI_STATS_Y 1
 #define DWIPE_GUI_STATS_X 44
 
@@ -93,7 +100,7 @@
 /* Select window: width, height, x coordinate, y coordinate. */
 #define DWIPE_GUI_MAIN_W  COLS
 #define DWIPE_GUI_MAIN_H  ( LINES - DWIPE_GUI_MAIN_Y -1 )
-#define DWIPE_GUI_MAIN_Y  8
+#define DWIPE_GUI_MAIN_Y  9
 #define DWIPE_GUI_MAIN_X  0
 
 
@@ -112,7 +119,7 @@ const char* options_title = " Options ";
 const char* stats_title = " Statistics ";
 
 /* Footer labels. */
-const char* dwipe_buttons1 = " P=PRNG M=Method V=Verify R=Rounds, J=Up K=Down Space=Select, F10=Start ";
+const char* dwipe_buttons1 = " P=PRNG M=Method V=Verify R=Rounds F=Toggle fingerprinting, J=Up K=Down Space=Select, F10=Start ";
 const char* dwipe_buttons2 = " J=Up K=Down Space=Select";
 
 
@@ -699,6 +706,11 @@ void dwipe_gui_select( int count, dwipe_context_t* c )
 				/* Run the option dialog. */
 				dwipe_gui_verify();
 				break;
+			case 'f':
+			case 'F':
+				/* Toggle fingerprinting */
+				dwipe_options.fingerprint = !dwipe_options.fingerprint;
+				break;
 
 		} /* keystroke switch */
 
@@ -771,6 +783,8 @@ void dwipe_gui_options( void )
 			
 	} /* switch verify */
 
+	mvwprintw( options_window, DWIPE_GUI_OPTIONS_FINGERPRINT_Y,  DWIPE_GUI_OPTIONS_FINGERPRINT_X, \
+	  "Fingerprinting:  %s", (dwipe_options.fingerprint ? "On" : "Off"));
 
 	mvwprintw( options_window, DWIPE_GUI_OPTIONS_ROUNDS_Y,  DWIPE_GUI_OPTIONS_ROUNDS_X,  "Rounds:  " );
 	wprintw( options_window, "%i", dwipe_options.rounds );

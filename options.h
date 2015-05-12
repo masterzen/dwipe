@@ -51,6 +51,7 @@ typedef struct /* dwipe_options_t */
 	int            rounds;    /* The number of times that the wipe method should be called. */
 	int            sync;      /* A flag to indicate whether writes should be sync'd.        */
 	dwipe_verify_t verify;    /* A flag to indicate whether writes should be verified.      */
+	bool fingerprint;         /* A flag to indicate whether or not to write fingerprint.    */
 } dwipe_options_t;
 
 extern dwipe_options_t dwipe_options;
