@@ -529,7 +529,7 @@ int main( int argc, char** argv )
 			fprintf( dwipe_result_fp, "DWIPE_RESULT='pass'\n" );
 		}
 
-		if( c1[i].result > 0 )
+		if( c1[i].result > 0 || c1[i].signal)
 		{
 			dwipe_log( DWIPE_LOG_NOTICE, "Wipe of device '%s' incomplete.", c1[i].device_name );
 			fprintf( dwipe_result_fp, "DWIPE_RESULT='fail'\n" );
