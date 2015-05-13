@@ -1065,14 +1065,14 @@ void dwipe_gui_prng( void )
 				noSave = true;
 			break;
 			case KEY_DOWN:
-			case 'j':
-			case 'J':
+			case 'k':
+			case 'K':
 				if (focus < count - 1) focus++;
 				else focus = 0;
 			break;
 			case KEY_UP:
-			case 'k':
-			case 'K':
+			case 'j':
+			case 'J':
 				if (focus > 0) focus--;
 				else focus = count - 1;
 			break;
@@ -1209,14 +1209,14 @@ void dwipe_gui_verify( void )
 				noSave = true;
 			break;
 			case KEY_DOWN:
-			case 'j':
-			case 'J':
+			case 'k':
+			case 'K':
 				if (focus < count - 1) focus++;
 				else focus = 0;
 			break;
 			case KEY_UP:
-			case 'k':
-			case 'K':
+			case 'j':
+			case 'J':
 				if (focus > 0) focus--;
 				else focus = count - 1;
 			break;
@@ -1306,14 +1306,14 @@ void dwipe_gui_configuration( void )
 		keystroke = getch();
 		switch (keystroke) {
 			case KEY_DOWN:
-			case 'j':
-			case 'J':
+			case 'k':
+			case 'K':
 				if (focus < count - 1) focus++;
 				else focus = 0;
 			break;
 			case KEY_UP:
-			case 'k':
-			case 'K':
+			case 'j':
+			case 'J':
 				if (focus > 0) focus--;
 				else focus = count - 1;
 			break;
