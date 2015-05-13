@@ -1146,7 +1146,7 @@ void dwipe_gui_verify( void )
 	wrefresh(win);
 
 
-	static struct dwipe_menu_items items[] = {
+	struct dwipe_menu_items items[] = {
 			{1, "Verification Off "},
 			{2, "Verify Last Pass "},
 			{3, "Verify All Passes"},
@@ -1273,7 +1273,7 @@ void dwipe_gui_configuration( void )
 	box(config_window, 0, 0);
 
 
-	static struct dwipe_menu_items items[] = {
+	struct dwipe_menu_items items[] = {
 			{1, "PRNG                   "},
 			{2, "Method                 "},
 			{3, "Verify                 "},
