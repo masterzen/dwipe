@@ -132,12 +132,12 @@ const char* options_title = " Options ";
 const char* stats_title = " Statistics ";
 
 /* Footer labels. */
-const char* dwipe_buttons1 = " P=PRNG M=Method V=Verify R=Rounds F=Toggle fingerprinting, J=Up K=Down Space=Select, F10=Start ";
+const char* dwipe_buttons1 = " C=Configuration, J=Up K=Down Space=Select, F10=Start ";
 const char* dwipe_buttons2 = " J=Up K=Down Space=Select";
 
 
 
-void dwipe_gui_title( WINDOW* w, const char* s )
+void dwipe_gui_title( WINDOW* w, const char* s, const int row )
 {
 /**
  * Prints the string 's' centered on the first line of the window 'w'.
@@ -152,10 +152,9 @@ void dwipe_gui_title( WINDOW* w, const char* s )
 
 	/* Get the window dimensions. */
 	getmaxyx( w, wy, wx );
-	
-	/* Print the title. */
-	mvwprintw( w, 0, ( wx - strlen( s ) ) / 2, "%s", s );
 
+	/* Print the title. */
+	mvwprintw( w, row, ( wx - strlen( s ) ) / 2, "%s", s );
 } /* dwipe_gui_title */
 
 
@@ -232,7 +231,7 @@ void dwipe_gui_init( void )
 	wclear( header_window );
 
 	/* Print the product banner. */
-	dwipe_gui_title( header_window, dwipe_options.banner );
+	dwipe_gui_title( header_window, dwipe_options.banner, 0 );
 
 	/* Create the footer window. */
 	footer_window = newwin( DWIPE_GUI_FOOTER_H, DWIPE_GUI_FOOTER_W, DWIPE_GUI_FOOTER_Y, DWIPE_GUI_FOOTER_X );
@@ -283,7 +282,7 @@ void dwipe_gui_init( void )
 	box( stats_window, 0, 0 );
 
 	/* Add a title. */
-	dwipe_gui_title( stats_window, stats_title );
+	dwipe_gui_title( stats_window, stats_title, 0 );
 
 	/* Print field labels. */
 	mvwprintw( stats_window, DWIPE_GUI_STATS_RUNTIME_Y,    DWIPE_GUI_STATS_RUNTIME_X,    "Runtime:       " );
@@ -403,7 +402,7 @@ void dwipe_gui_select( int count, dwipe_context_t* c )
 
 		/* Update the footer window. */
 		werase( footer_window );
-		dwipe_gui_title( footer_window, dwipe_buttons1 );
+		dwipe_gui_title( footer_window, dwipe_buttons1, 0 );
 		wrefresh( footer_window );
 
 		/* Update the options window. */
@@ -497,7 +496,7 @@ void dwipe_gui_select( int count, dwipe_context_t* c )
 		box( main_window, 0, 0 );
 
 		/* Print a title. */
-		dwipe_gui_title( main_window, select_title );
+		dwipe_gui_title( main_window, select_title, 0 );
 
 		/* Refresh the window. */
 		wrefresh( main_window );
@@ -816,7 +815,7 @@ void dwipe_gui_options( void )
 	box( options_window, 0, 0 );
 
 	/* Add a title. */
-	dwipe_gui_title( options_window, options_title );
+	dwipe_gui_title( options_window, options_title, 0 );
 
 	/* Refresh the window. */
 	wrefresh( options_window );
@@ -861,7 +860,7 @@ void dwipe_gui_rounds( void )
 		box( main_window, 0, 0 );
 
 		/* Add a title. */
-		dwipe_gui_title( main_window, " Rounds " );
+		dwipe_gui_title( main_window, " Rounds ", 0 );
 
 		/* Initialize the working row. */
 		yy = 4;
@@ -979,7 +978,7 @@ void dwipe_gui_prng( void )
 
 	/* Update the footer window. */
 	werase( footer_window );
-	dwipe_gui_title( footer_window, dwipe_buttons2 );
+	dwipe_gui_title( footer_window, dwipe_buttons2, 0 );
 	wrefresh( footer_window );
 
 	if( dwipe_options.prng == &dwipe_twister ) { focus = 0; }
@@ -1037,7 +1036,7 @@ void dwipe_gui_prng( void )
 		box( main_window, 0, 0 );
 
 		/* Add a title. */
-		dwipe_gui_title( main_window, " Pseudo Random Number Generator " );
+		dwipe_gui_title( main_window, " Pseudo Random Number Generator ", 0 );
 
 		/* Refresh the window. */
 		wrefresh( main_window );
@@ -1139,7 +1138,7 @@ void dwipe_gui_verify( void )
 
 	while (!breakLoop) {
 		werase(win);
-		mvwprintw(win, 2, tab1, "Verification Mode:");
+		dwipe_gui_title(win, "Verification Mode", 1);
 
 		int i = 0;
 		for (i = 0; i < count; i++) {
@@ -1258,7 +1257,7 @@ void dwipe_gui_configuration( void )
 
 	do {
 		werase(config_window);
-		mvwprintw(config_window, 2, tab1, "Settings:");
+		dwipe_gui_title(config_window, "Settings", 1);
 
 		int i = 0;
 		for (i = 0; i < count; i++) {
@@ -1349,7 +1348,7 @@ void dwipe_gui_method( void )
 
 	/* Update the footer window. */
 	werase( footer_window );
-	dwipe_gui_title( footer_window, dwipe_buttons2 );
+	dwipe_gui_title( footer_window, dwipe_buttons2, 0 );
 	wrefresh( footer_window );
 
 	if( dwipe_options.method == &dwipe_zero       ) { focus = 0; }
@@ -1458,7 +1457,7 @@ void dwipe_gui_method( void )
 		box( main_window, 0, 0 );
 
 		/* Add a title. */
-		dwipe_gui_title( main_window, " Wipe Method " );
+		dwipe_gui_title( main_window, " Wipe Method ", 0 );
 
 		/* Refresh the window. */
 		wrefresh( main_window );
