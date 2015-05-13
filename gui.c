@@ -115,6 +115,12 @@
 #define DWIPE_GUI_VERIFY_Y (LINES - DWIPE_GUI_VERIFY_H) / 2
 #define DWIPE_GUI_VERIFY_X (COLS - DWIPE_GUI_VERIFY_W) / 2
 
+/* PRNG settings window: width, height, x coordinate, y coordinate */
+#define DWIPE_GUI_PRNG_H 20
+#define DWIPE_GUI_PRNG_W 80
+#define DWIPE_GUI_PRNG_Y (LINES - DWIPE_GUI_PRNG_H) / 2
+#define DWIPE_GUI_PRNG_X (COLS - DWIPE_GUI_PRNG_W) / 2
+
 
 /* Window pointers. */
 WINDOW* footer_window;
@@ -951,158 +957,28 @@ void dwipe_gui_prng( void )
  * Allows the user to change the PRNG.
  *
  * @modifies  dwipe_options.prng
- * @modifies  main_window
  *
  */
 
 	extern dwipe_prng_t dwipe_twister;
 	extern dwipe_prng_t dwipe_isaac;
 
-	/* The number of implemented PRNGs. */
-	const int count = 2;
-
-	/* The first tabstop. */
-	const int tab1 = 2;
-
-	/* The second tabstop. */
-	const int tab2 = 30;
-
-	/* Set the initial focus. */
-	int focus = 0;
-
-	/* The current working row. */
-	int yy;
-
-	/* Input buffer. */
-	int keystroke;
-
-	/* Update the footer window. */
-	werase( footer_window );
-	dwipe_gui_title( footer_window, dwipe_buttons2, 0 );
-	wrefresh( footer_window );
-
-	if( dwipe_options.prng == &dwipe_twister ) { focus = 0; }
-	if( dwipe_options.prng == &dwipe_isaac   ) { focus = 1; }
-
-
-	while( 1 )
-	{
-		/* Clear the main window. */
-		werase( main_window );
-
-		/* Initialize the working row. */
-		yy = 2;
-
-		/* Print the options. */
-		mvwprintw( main_window, yy++, tab1, ""                  );
-		mvwprintw( main_window, yy++, tab1, ""                  );
-		mvwprintw( main_window, yy++, tab1, "  %s", dwipe_twister.label );
-		mvwprintw( main_window, yy++, tab1, "  %s", dwipe_isaac.label   );
-		mvwprintw( main_window, yy++, tab1, ""                  );
-
-		/* Print the cursor. */
-		mvwaddch( main_window, 4 + focus, tab1, ACS_RARROW );
-
-
-		switch( focus )
-		{
-			case 0:
-
-				mvwprintw( main_window, 2, tab2, "syslinux.cfg:  nuke=\"dwipe --prng twister\"" );
-
-				/*                                 0         1         2         3         4         5         6         7        8  */
-				mvwprintw( main_window, yy++, tab1, "The Mersenne Twister, by Makoto Matsumoto and Takuji Nishimura, is a        " );
-				mvwprintw( main_window, yy++, tab1, "generalized feedback shift register PRNG that is uniform and                " );
-				mvwprintw( main_window, yy++, tab1, "equidistributed in 623-dimensions with a proven period of 2^19937-1.        " );
-				mvwprintw( main_window, yy++, tab1, "                                                                            " );
-				mvwprintw( main_window, yy++, tab1, "This implementation passes the Marsaglia Diehard test suite.                " );
-				mvwprintw( main_window, yy++, tab1, "                                                                            " );
-				break;
-
-			case 1:
-
-				mvwprintw( main_window, 2, tab2, "syslinux.cfg:  nuke=\"dwipe --prng isaac\"" );
-
-				/*                                 0         1         2         3         4         5         6         7        8  */
-				mvwprintw( main_window, yy++, tab1, "ISAAC, by Bob Jenkins, is a PRNG derived from RC4 with a minimum period of  " );
-				mvwprintw( main_window, yy++, tab1, "2^40 and an expected period of 2^8295.  It is difficult to recover the      " );
-				mvwprintw( main_window, yy++, tab1, "initial PRNG state by cryptanalysis of the ISAAC stream.                    " );
-				mvwprintw( main_window, yy++, tab1, "                                                                            " );
-				break;
-
-		} /* switch */
-
-		/* Add a border. */
-		box( main_window, 0, 0 );
-
-		/* Add a title. */
-		dwipe_gui_title( main_window, " Pseudo Random Number Generator ", 0 );
-
-		/* Refresh the window. */
-		wrefresh( main_window );
-
-		/* Get a keystroke. */
-		keystroke = getch();
-
-		switch( keystroke )
-		{
-			case KEY_DOWN:
-			case 'j':
-			case 'J':
-
-				if( focus < count -1 ) { focus += 1; } 
-				break;
-
-			case KEY_UP:
-			case 'k':
-			case 'K':
-
-				if( focus > 0 ) { focus -= 1; } 
-				break;
-
-			case KEY_ENTER:
-			case ' ':
-			case 10:
-
-				if( focus == 0 ) { dwipe_options.prng = &dwipe_twister; }
-				if( focus == 1 ) { dwipe_options.prng = &dwipe_isaac;   }
-				return;
-
-			case KEY_BACKSPACE:
-			case KEY_BREAK:
-
-				return;
-
-		} /* switch */
-		
-	} /* while */
-
-} /* dwipe_gui_prng */
-
-
-
-void dwipe_gui_verify( void )
-{
-/**
- * Allows the user to change the verification option.
- *
- * @modifies  dwipe_options.verify
- *
- */
 
 	int keystroke;
 
 	/* Create Window */
 	WINDOW* win;
 
-	win = newwin( DWIPE_GUI_VERIFY_H, DWIPE_GUI_VERIFY_W, DWIPE_GUI_VERIFY_Y, DWIPE_GUI_VERIFY_X );
+	win = newwin( DWIPE_GUI_PRNG_H, DWIPE_GUI_PRNG_W, DWIPE_GUI_PRNG_Y, DWIPE_GUI_PRNG_X );
 
 	int selected_item = COLOR_PAIR(1);
 	int normal_item = COLOR_PAIR(7);
-	
+
 	/* Set the initial focus. */
-	int focus = dwipe_options.verify;
-	
+	int focus;
+	if( dwipe_options.prng == &dwipe_twister ) { focus = 0; }
+	if( dwipe_options.prng == &dwipe_isaac   ) { focus = 1; }
+
 	if( has_colors() )
 	{
 		/* Set the background style. */
@@ -1119,54 +995,58 @@ void dwipe_gui_verify( void )
 
 	wrefresh(win);
 
-
-	static struct dwipe_menu_items items[] = {
-			{1, "Verification Off "},
-			{2, "Verify Last Pass "},
-			{3, "Verify All Passes"},
+	struct dwipe_menu_items items[] = {
+			{1, dwipe_twister.label },
+			{2, dwipe_isaac.label },
 		};
 	int count = sizeof(items) / sizeof(items[0]); // Number of items
 
 
-	int tab1 = 2; // Starting column for headings
-	int tab2 = 5; // Starting column for menu
-	int help_row = 10; // Starting row for help
+	// Work out the longest line to pad others to match
+	int i = 0;
+	int longest = 0;
+	for (i = 0; i < count; i++) {
+		if (strlen(items[i].text) > longest) {
+			longest = strlen(items[i].text);
+		}
+	}
+	longest += 5; // Add a slight border
+
+	int tab1 = 5; // Starting column for menu
 	int row = 4; // Starting row for menu
 
-	
 	bool breakLoop = false;
+	bool noSave = false;
 
 	while (!breakLoop) {
+		int help_row = 10; // Starting row for help
+
 		werase(win);
-		dwipe_gui_title(win, "Verification Mode", 1);
+		dwipe_gui_title(win, "Pseudo Random Number Generator", 1);
 
 		int i = 0;
 		for (i = 0; i < count; i++) {
 			if (focus == i) wattron(win, selected_item);
-			mvwprintw(win, row + i, tab2, "%d) %s", items[i].number, items[i].text);
+			mvwprintw(win, row + i, tab1, "%d) %s%*s", items[i].number, items[i].text, (longest - strlen(items[i].text)), " ");
 			if (focus == i) wattron(win, normal_item);
 		}
 
 		switch (focus) {
 			case 0:
-				mvwprintw(win, help_row, tab2, "syslinux.cfg:  nuke=\"dwipe --verify off\"");
-				mvwprintw(win, help_row + 1, tab2, "");
-				mvwprintw(win, help_row + 2, tab2, "Do not verify passes. The wipe will be a write-only operation.");
+				mvwprintw(win, help_row++, tab1, "syslinux.cfg:  nuke=\"dwipe --prng twister\"" );
+				help_row++;
+				mvwprintw(win, help_row++, tab1, "The Mersenne Twister, by Makoto Matsumoto and Takuji Nishimura, is a");
+				mvwprintw(win, help_row++, tab1, "generalized feedback shift register PRNG that is uniform and");
+				mvwprintw(win, help_row++, tab1, "equidistributed in 623-dimensions with a proven period of 2^19937-1.");
+				help_row++;
+				mvwprintw(win, help_row++, tab1, "This implementation passes the Marsaglia Diehard test suite.");
 			break;
 			case 1:
-				mvwprintw(win, help_row, tab2, "syslinux.cfg:  nuke=\"dwipe --verify last\"");
-				mvwprintw(win, help_row + 1, tab2, "");
-				mvwprintw(win, help_row + 2, tab2, "Check whether the device is actually empty after the last pass fills the");
-				mvwprintw(win, help_row + 3, tab2, "device with zeros.");
-			break;
-			case 2:
-				mvwprintw(win, help_row, tab2, "syslinux.cfg:  nuke=\"dwipe --verify all\"");
-				mvwprintw(win, help_row + 1, tab2, "");
-				mvwprintw(win, help_row + 2, tab2, "After every pass, read back the pattern and check whether it is correct.");
-				mvwprintw(win, help_row + 3, tab2, "");
-				mvwprintw(win, help_row + 4, tab2, "This program writes the entire length of the device before it reads back");
-				mvwprintw(win, help_row + 5, tab2, "for verification, even for random pattern passes, to better ensure that");
-				mvwprintw(win, help_row + 6, tab2, "hardware caches are actually flushed.");
+				mvwprintw(win, help_row++, tab1, "syslinux.cfg:  nuke=\"dwipe --prng isaac\"");
+				help_row++;
+				mvwprintw(win, help_row++, tab1, "ISAAC, by Bob Jenkins, is a PRNG derived from RC4 with a minimum");
+				mvwprintw(win, help_row++, tab1, "period of 2^40 and an expected period of 2^8295.  It is difficult to");
+				mvwprintw(win, help_row++, tab1, "recover the initial PRNG state by cryptanalysis of the ISAAC stream.");
 			break;
 		}
 
@@ -1175,6 +1055,12 @@ void dwipe_gui_verify( void )
 
 		keystroke = getch();
 		switch (keystroke) {
+			case KEY_BACKSPACE:
+			case 127:
+			case 27: // Escape
+				breakLoop = true;
+				noSave = true;
+			break;
 			case KEY_DOWN:
 			case 'j':
 			case 'J':
@@ -1206,8 +1092,154 @@ void dwipe_gui_verify( void )
 			break;
 		}
 	}
+
+	if (!noSave) {
+		if (focus == 0) { dwipe_options.prng = &dwipe_twister; }
+		else if (focus == 1) { dwipe_options.prng = &dwipe_isaac; }
+	}
+
+	werase(win);
+	delwin(win);
+} /* dwipe_gui_prng */
+
+
+
+void dwipe_gui_verify( void )
+{
+/**
+ * Allows the user to change the verification option.
+ *
+ * @modifies  dwipe_options.verify
+ *
+ */
+
+	int keystroke;
+
+	/* Create Window */
+	WINDOW* win;
+
+	win = newwin( DWIPE_GUI_VERIFY_H, DWIPE_GUI_VERIFY_W, DWIPE_GUI_VERIFY_Y, DWIPE_GUI_VERIFY_X );
+
+	int selected_item = COLOR_PAIR(1);
+	int normal_item = COLOR_PAIR(7);
+
+	/* Set the initial focus. */
+	int focus = dwipe_options.verify;
 	
-	dwipe_options.verify = focus;
+	if( has_colors() )
+	{
+		/* Set the background style. */
+		wbkgdset( win, COLOR_PAIR(7) | ' ' );
+
+		/* Apply the color change. */
+		wattron( win, COLOR_PAIR(7) );
+	}
+
+	/* Clear the window. */
+	werase( win );
+	/* Add a border. */
+	box(win, 0, 0);
+
+	wrefresh(win);
+
+
+	static struct dwipe_menu_items items[] = {
+			{1, "Verification Off "},
+			{2, "Verify Last Pass "},
+			{3, "Verify All Passes"},
+		};
+	int count = sizeof(items) / sizeof(items[0]); // Number of items
+
+
+	int tab1 = 5; // Starting column for menu
+	int row = 4; // Starting row for menu
+
+	
+	bool breakLoop = false;
+	bool noSave = false;
+
+	while (!breakLoop) {
+		int help_row = 10; // Starting row for help
+
+		werase(win);
+		dwipe_gui_title(win, "Verification Mode", 1);
+
+		int i = 0;
+		for (i = 0; i < count; i++) {
+			if (focus == i) wattron(win, selected_item);
+			mvwprintw(win, row + i, tab1, "%d) %s", items[i].number, items[i].text);
+			if (focus == i) wattron(win, normal_item);
+		}
+
+		switch (focus) {
+			case 0:
+				mvwprintw(win, help_row++, tab1, "syslinux.cfg:  nuke=\"dwipe --verify off\"");
+				help_row++;
+				mvwprintw(win, help_row++, tab1, "Do not verify passes. The wipe will be a write-only operation.");
+			break;
+			case 1:
+				mvwprintw(win, help_row++, tab1, "syslinux.cfg:  nuke=\"dwipe --verify last\"");
+				help_row++;
+				mvwprintw(win, help_row++, tab1, "Check whether the device is actually empty after the last pass fills the");
+				mvwprintw(win, help_row++, tab1, "device with zeros.");
+			break;
+			case 2:
+				mvwprintw(win, help_row++, tab1, "syslinux.cfg:  nuke=\"dwipe --verify all\"");
+				help_row++;
+				mvwprintw(win, help_row++, tab1, "After every pass, read back the pattern and check whether it is correct.");
+				mvwprintw(win, help_row++, tab1, "");
+				mvwprintw(win, help_row++, tab1, "This program writes the entire length of the device before it reads back");
+				mvwprintw(win, help_row++, tab1, "for verification, even for random pattern passes, to better ensure that");
+				mvwprintw(win, help_row++, tab1, "hardware caches are actually flushed.");
+			break;
+		}
+
+		/* Refresh Window */
+		wrefresh(win);
+
+		keystroke = getch();
+		switch (keystroke) {
+			case KEY_BACKSPACE:
+			case 127:
+			case 27: // Escape
+				breakLoop = true;
+				noSave = true;
+			break;
+			case KEY_DOWN:
+			case 'j':
+			case 'J':
+				if (focus < count - 1) focus++;
+				else focus = 0;
+			break;
+			case KEY_UP:
+			case 'k':
+			case 'K':
+				if (focus > 0) focus--;
+				else focus = count - 1;
+			break;
+			case KEY_ENTER:
+			case ' ':
+			case 10: {
+				int i = 0;
+				for (i = 0; i < count; i++) {
+					if (focus == i) {
+						breakLoop = true;
+					}
+				}
+			}
+			break;
+			case '1':
+			case '2':
+			case '3':
+				focus = keystroke - '0' - 1;
+				//breakLoop = true;
+			break;
+		}
+	}
+
+	if (!noSave) {
+		dwipe_options.verify = focus;
+	}
 
 	werase(win);
 	delwin(win);
@@ -1249,8 +1281,7 @@ void dwipe_gui_configuration( void )
 
 
 	int keystroke;
-	int tab1 = 2; // Starting column for headings
-	int tab2 = 5; // Starting column for menu
+	int tab1 = 5; // Starting column for menu
 	int row = 4; // Starting row for menu
 	int focus = -1; // Currently selected item
 	int count = sizeof(items) / sizeof(items[0]); // Number of items
@@ -1262,7 +1293,7 @@ void dwipe_gui_configuration( void )
 		int i = 0;
 		for (i = 0; i < count; i++) {
 			if (focus == i) wattron(config_window, selected_item); // Highlight this line
-			mvwprintw(config_window, row + i, tab2, "%d) %s", items[i].number, items[i].text);
+			mvwprintw(config_window, row + i, tab1, "%d) %s", items[i].number, items[i].text);
 			if (focus == i) wattron(config_window, normal_item); // Reset colour
 		}
 
@@ -1301,8 +1332,14 @@ void dwipe_gui_configuration( void )
 			case '1':
 				dwipe_gui_prng();
 			break;
+			case '2':
+				dwipe_gui_method();
+			break;
 			case '3':
 				dwipe_gui_verify();
+			break;
+			case '4':
+				dwipe_gui_rounds();
 			break;
 			case '5':
 				dwipe_options.fingerprint = !dwipe_options.fingerprint;
@@ -1311,7 +1348,7 @@ void dwipe_gui_configuration( void )
 
 		refresh_all_windows();
 		dwipe_gui_options();
-	} while (keystroke != '0');
+	} while (keystroke != '0' && keystroke != KEY_BACKSPACE && keystroke != 127 && keystroke != 27);
 
 	delwin(config_window);
 } /* dwipe_gui_configuration */
