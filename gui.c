@@ -138,7 +138,7 @@ const char* options_title = " Options ";
 const char* stats_title = " Statistics ";
 
 /* Footer labels. */
-const char* dwipe_buttons1 = " C=Configuration, J=Up K=Down Space=Select, F10=Start ";
+const char* dwipe_buttons1 = " C=Configuration, J=Up K=Down Space=Select Escape=Back, F10=Start ";
 const char* dwipe_buttons2 = " J=Up K=Down Space=Select";
 
 
