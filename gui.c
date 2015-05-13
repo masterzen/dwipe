@@ -109,6 +109,12 @@
 #define DWIPE_GUI_CONFIG_Y (LINES - DWIPE_GUI_CONFIG_H) / 2
 #define DWIPE_GUI_CONFIG_X (COLS - DWIPE_GUI_CONFIG_W) / 2
 
+/* Verification settings window: width, height, x coordinate, y coordinate */
+#define DWIPE_GUI_VERIFY_H 20
+#define DWIPE_GUI_VERIFY_W 80
+#define DWIPE_GUI_VERIFY_Y (LINES - DWIPE_GUI_VERIFY_H) / 2
+#define DWIPE_GUI_VERIFY_X (COLS - DWIPE_GUI_VERIFY_W) / 2
+
 
 /* Window pointers. */
 WINDOW* footer_window;
@@ -1082,7 +1088,6 @@ void dwipe_gui_verify( void )
  * Allows the user to change the verification option.
  *
  * @modifies  dwipe_options.verify
- * @modifies  main_window
  *
  */
 
@@ -1091,10 +1096,6 @@ void dwipe_gui_verify( void )
 	/* Create Window */
 	WINDOW* win;
 
-#define DWIPE_GUI_VERIFY_H 40
-#define DWIPE_GUI_VERIFY_W 80
-#define DWIPE_GUI_VERIFY_Y (LINES - DWIPE_GUI_VERIFY_H) / 2
-#define DWIPE_GUI_VERIFY_X (COLS - DWIPE_GUI_VERIFY_W) / 2
 	win = newwin( DWIPE_GUI_VERIFY_H, DWIPE_GUI_VERIFY_W, DWIPE_GUI_VERIFY_Y, DWIPE_GUI_VERIFY_X );
 
 	int selected_item = COLOR_PAIR(1);
@@ -1130,7 +1131,7 @@ void dwipe_gui_verify( void )
 
 	int tab1 = 2; // Starting column for headings
 	int tab2 = 5; // Starting column for menu
-	int help_row = 15; // Starting row for help
+	int help_row = 10; // Starting row for help
 	int row = 4; // Starting row for menu
 
 	
@@ -1138,13 +1139,36 @@ void dwipe_gui_verify( void )
 
 	while (!breakLoop) {
 		werase(win);
-		mvwprintw(win, 2, tab1, "Verification:");
+		mvwprintw(win, 2, tab1, "Verification Mode:");
 
 		int i = 0;
 		for (i = 0; i < count; i++) {
 			if (focus == i) wattron(win, selected_item);
 			mvwprintw(win, row + i, tab2, "%d) %s", items[i].number, items[i].text);
 			if (focus == i) wattron(win, normal_item);
+		}
+
+		switch (focus) {
+			case 0:
+				mvwprintw(win, help_row, tab2, "syslinux.cfg:  nuke=\"dwipe --verify off\"");
+				mvwprintw(win, help_row + 1, tab2, "");
+				mvwprintw(win, help_row + 2, tab2, "Do not verify passes. The wipe will be a write-only operation.");
+			break;
+			case 1:
+				mvwprintw(win, help_row, tab2, "syslinux.cfg:  nuke=\"dwipe --verify last\"");
+				mvwprintw(win, help_row + 1, tab2, "");
+				mvwprintw(win, help_row + 2, tab2, "Check whether the device is actually empty after the last pass fills the");
+				mvwprintw(win, help_row + 3, tab2, "device with zeros.");
+			break;
+			case 2:
+				mvwprintw(win, help_row, tab2, "syslinux.cfg:  nuke=\"dwipe --verify all\"");
+				mvwprintw(win, help_row + 1, tab2, "");
+				mvwprintw(win, help_row + 2, tab2, "After every pass, read back the pattern and check whether it is correct.");
+				mvwprintw(win, help_row + 3, tab2, "");
+				mvwprintw(win, help_row + 4, tab2, "This program writes the entire length of the device before it reads back");
+				mvwprintw(win, help_row + 5, tab2, "for verification, even for random pattern passes, to better ensure that");
+				mvwprintw(win, help_row + 6, tab2, "hardware caches are actually flushed.");
+			break;
 		}
 
 		/* Refresh Window */
@@ -1156,11 +1180,13 @@ void dwipe_gui_verify( void )
 			case 'j':
 			case 'J':
 				if (focus < count - 1) focus++;
+				else focus = 0;
 			break;
 			case KEY_UP:
 			case 'k':
 			case 'K':
 				if (focus > 0) focus--;
+				else focus = count - 1;
 			break;
 			case KEY_ENTER:
 			case ' ':
@@ -1173,6 +1199,12 @@ void dwipe_gui_verify( void )
 				}
 			}
 			break;
+			case '1':
+			case '2':
+			case '3':
+				focus = keystroke - '0' - 1;
+				//breakLoop = true;
+			break;
 		}
 	}
 	
@@ -1180,130 +1212,6 @@ void dwipe_gui_verify( void )
 
 	werase(win);
 	delwin(win);
-
-	refresh_all_windows();
-
-#if 0	
-	
-	/* The number of definitions in the dwipe_verify_t enumeration. */
-	const int count = 3;
-
-	/* The first tabstop. */
-	const int tab1 = 2;
-
-	/* The second tabstop. */
-	const int tab2 = 30;
-
-	/* Set the initial focus. */
-	int focus = dwipe_options.verify;
-
-	/* The current working row. */
-	int yy;
-
-	/* Input buffer. */
-	int keystroke;
-	
-	/* Update the footer window. */
-	werase( footer_window );
-	dwipe_gui_title( footer_window, dwipe_buttons2 );
-	wrefresh( footer_window );
-
-	while( 1 )
-	{
-		/* Clear the main window. */
-		werase( main_window );
-
-		/* Initialize the working row. */
-		yy = 2;
-
-		/* Print the options. */
-		mvwprintw( main_window, yy++, tab1, "  Verification Off  "  );
-		mvwprintw( main_window, yy++, tab1, "  Verify Last Pass  " );
-		mvwprintw( main_window, yy++, tab1, "  Verify All Passes " );
-		mvwprintw( main_window, yy++, tab1, "                    " );
-
-		/* Print the cursor. */
-		mvwaddch( main_window, 2 + focus, tab1, ACS_RARROW );
-
-
-		switch( focus )
-		{
-			case 0:
-
-				mvwprintw( main_window, 2, tab2, "syslinux.cfg:  nuke=\"dwipe --verify off\"" );
-
-				/*                                 0         1         2         3         4         5         6         7        8  */
-				mvwprintw( main_window, yy++, tab1, "Do not verify passes. The wipe will be a write-only operation.              " );
-				mvwprintw( main_window, yy++, tab1, "                                                                            " );
-				break;
-
-			case 1:
-
-				mvwprintw( main_window, 2, tab2, "syslinux.cfg:  nuke=\"dwipe --verify last\"" );
-
-				/*                                 0         1         2         3         4         5         6         7        8  */
-				mvwprintw( main_window, yy++, tab1, "Check whether the device is actually empty after the last pass fills the    " );
-				mvwprintw( main_window, yy++, tab1, "device with zeros.                                                          " );
-				break;
-
-			case 2:
-
-				mvwprintw( main_window, 2, tab2, "syslinux.cfg:  nuke=\"dwipe --verify all\"" );
-
-				/*                                 0         1         2         3         4         5         6         7        8  */
-				mvwprintw( main_window, yy++, tab1, "After every pass, read back the pattern and check whether it is correct.    " );
-				mvwprintw( main_window, yy++, tab1, "                                                                            " );
-				mvwprintw( main_window, yy++, tab1, "This program writes the entire length of the device before it reads back    " );
-				mvwprintw( main_window, yy++, tab1, "for verification, even for random pattern passes, to better ensure that     " );
-				mvwprintw( main_window, yy++, tab1, "hardware caches are actually flushed.                                       " );
-				break;
-
-		} /* switch */
-
-		/* Add a border. */
-		box( main_window, 0, 0 );
-
-		/* Add a title. */
-		dwipe_gui_title( main_window, " Verification Mode " );
-
-		/* Refresh the window. */
-		wrefresh( main_window );
-
-		/* Get a keystroke. */
-		keystroke = getch();
-
-		switch( keystroke )
-		{
-			case KEY_DOWN:
-			case 'j':
-			case 'J':
-
-				if( focus < count -1 ) { focus += 1; } 
-				break;
-
-			case KEY_UP:
-			case 'k':
-			case 'K':
-
-				if( focus > 0 ) { focus -= 1; } 
-				break;
-
-			case KEY_ENTER:
-			case ' ':
-			case 10:
-
-				if( focus >= 0 && focus < count ){ dwipe_options.verify = focus; }
-				return;
-
-			case KEY_BACKSPACE:
-			case KEY_BREAK:
-
-				return;
-
-		} /* switch */
-		
-	} /* while */
-#endif
 } /* dwipe_gui_verify */
 
 
@@ -1368,11 +1276,13 @@ void dwipe_gui_configuration( void )
 			case 'j':
 			case 'J':
 				if (focus < count - 1) focus++;
+				else focus = 0;
 			break;
 			case KEY_UP:
 			case 'k':
 			case 'K':
 				if (focus > 0) focus--;
+				else focus = count - 1;
 			break;
 			case KEY_ENTER:
 			case ' ':
