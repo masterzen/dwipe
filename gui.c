@@ -51,7 +51,7 @@
 #define DWIPE_GUI_FOOTER_X  0
 #define DWIPE_GUI_FOOTER_Y  (LINES -1)
 
-/* Options window: width, height, x coorindate, y coordinate. */
+/* Options window: width, height, x coordinate, y coordinate. */
 #define DWIPE_GUI_OPTIONS_W   44
 #define DWIPE_GUI_OPTIONS_H   8
 #define DWIPE_GUI_OPTIONS_Y   1
@@ -120,6 +120,12 @@
 #define DWIPE_GUI_PRNG_W 80
 #define DWIPE_GUI_PRNG_Y (LINES - DWIPE_GUI_PRNG_H) / 2
 #define DWIPE_GUI_PRNG_X (COLS - DWIPE_GUI_PRNG_W) / 2
+
+/* Method selection window: width, height, x coordinate, y coordinate */
+#define DWIPE_GUI_METHOD_H 24
+#define DWIPE_GUI_METHOD_W 85
+#define DWIPE_GUI_METHOD_Y (LINES - DWIPE_GUI_METHOD_H) / 2
+#define DWIPE_GUI_METHOD_X (COLS - DWIPE_GUI_METHOD_W) / 2
 
 
 /* Window pointers. */
@@ -1364,33 +1370,21 @@ void dwipe_gui_method( void )
  * Allows the user to change the wipe method.
  *
  * @modifies  dwipe_options.method
- * @modifies  main_window
  *
  */
 
-	/* The number of implemented methods. */
-	const int count = 6;
-
-	/* The first tabstop. */
-	const int tab1 = 2;
-
-	/* The second tabstop. */
-	const int tab2 = 30;
-
-	/* The currently selected method. */
-	int focus = 0;
-
-	/* The current working row. */
-	int yy;
-
-	/* Input buffer. */
 	int keystroke;
 
-	/* Update the footer window. */
-	werase( footer_window );
-	dwipe_gui_title( footer_window, dwipe_buttons2, 0 );
-	wrefresh( footer_window );
+	/* Create Window */
+	WINDOW* win;
 
+	win = newwin( DWIPE_GUI_METHOD_H, DWIPE_GUI_METHOD_W, DWIPE_GUI_METHOD_Y, DWIPE_GUI_METHOD_X );
+
+	int selected_item = COLOR_PAIR(1);
+	int normal_item = COLOR_PAIR(7);
+
+	/* Set the initial focus. */
+	int focus;
 	if( dwipe_options.method == &dwipe_zero       ) { focus = 0; }
 	if( dwipe_options.method == &dwipe_ops2       ) { focus = 1; }
 	if( dwipe_options.method == &dwipe_dodshort   ) { focus = 2; }
@@ -1398,166 +1392,195 @@ void dwipe_gui_method( void )
 	if( dwipe_options.method == &dwipe_gutmann    ) { focus = 4; }
 	if( dwipe_options.method == &dwipe_random     ) { focus = 5; }
 
-
-	do
+	if( has_colors() )
 	{
-		/* Clear the main window. */
-		werase( main_window );
+		/* Set the background style. */
+		wbkgdset( win, COLOR_PAIR(7) | ' ' );
 
-		/* Initialize the working row. */
-		yy = 2;
-
-		/* Print the options. */
-		mvwprintw( main_window, yy++, tab1, "  %s", dwipe_method_label( &dwipe_zero       ) );
-		mvwprintw( main_window, yy++, tab1, "  %s", dwipe_method_label( &dwipe_ops2       ) );
-		mvwprintw( main_window, yy++, tab1, "  %s", dwipe_method_label( &dwipe_dodshort   ) );
-		mvwprintw( main_window, yy++, tab1, "  %s", dwipe_method_label( &dwipe_dod522022m ) );
-		mvwprintw( main_window, yy++, tab1, "  %s", dwipe_method_label( &dwipe_gutmann    ) );
-		mvwprintw( main_window, yy++, tab1, "  %s", dwipe_method_label( &dwipe_random     ) );
-		mvwprintw( main_window, yy++, tab1, "                                             " );
-
-		/* Print the cursor. */
-		mvwaddch( main_window, 2 + focus, tab1, ACS_RARROW );
-
-		switch( focus )
-		{
-			case 0:
-
-				mvwprintw( main_window, 2, tab2, "syslinux.cfg: nuke=\"dwipe --method zero\"" );
-				mvwprintw( main_window, 3, tab2, "Security Level: Low (1 pass)" );
-
-				/*                                 0         1         2         3         4         5         6         7         8  */
-				mvwprintw( main_window, yy++, tab1, "This method fills the device with zeros. Note that the rounds option does    " );
-				mvwprintw( main_window, yy++, tab1, "not apply to this method. This method always runs one round.                 " );
-				mvwprintw( main_window, yy++, tab1, "                                                                             " );
-				mvwprintw( main_window, yy++, tab1, "Use this method to blank disks before internal redeployment, or before       " );
-				mvwprintw( main_window, yy++, tab1, "reinstalling Microsoft Windows to remove the data areas that the format      " );
-				mvwprintw( main_window, yy++, tab1, "utility preserves.                                                    " );
-				break;
-
-			case 1:
-
-				mvwprintw( main_window, 2, tab2, "syslinux.cfg: nuke=\"dwipe --method ops2\"" );
-				mvwprintw( main_window, 3, tab2, "Security Level: Medium (8 passes)" );
-
-				/*                                 0         1         2         3         4         5         6         7         8  */
-				mvwprintw( main_window, yy++, tab1, "The Royal Canadian Mounted Police Technical Security Standard for            " );
-				mvwprintw( main_window, yy++, tab1, "Information Technology, Appendix OPS-II: Media Sanitization.                 " );
-				mvwprintw( main_window, yy++, tab1, "                                                                             " );
-				mvwprintw( main_window, yy++, tab1, "This implementation, with regards to paragraph 2 section A of the standard,  " );
-				mvwprintw( main_window, yy++, tab1, "uses a pattern that is one random byte and that is changed each round.       " );
-				break;
-
-			case 2:
-
-				mvwprintw( main_window, 2, tab2, "syslinux.cfg: nuke=\"dwipe --method dodshort\"" );
-				mvwprintw( main_window, 3, tab2, "Security Level: Medium (3 passes)" );
-
-				/*                                 0         1         2         3         4         5         6         7         8  */
-				mvwprintw( main_window, yy++, tab1, "The American Department of Defense 5220.22-M short wipe.                     " );
-				mvwprintw( main_window, yy++, tab1, "This method is composed of passes 1,2,7 from the standard wipe.              " );
-				break;
-
-			case 3:
-
-				mvwprintw( main_window, 2, tab2, "syslinux.cfg: nuke=\"dwipe --method dod522022m\"" );
-				mvwprintw( main_window, 3, tab2, "Security Level: Medium (7 passes)" );
-
-				/*                                 0         1         2         3         4         5         6         7         8  */
-				mvwprintw( main_window, yy++, tab1, "The American Department of Defense 5220.22-M standard wipe.                  " );
-				mvwprintw( main_window, yy++, tab1, "This implementation uses the same algorithm as the Heidi Eraser product.     " );
-				break;
-
-			case 4:
-
-				mvwprintw( main_window, 2, tab2, "syslinux.cfg: nuke=\"dwipe --method gutmann\"" );
-				mvwprintw( main_window, 3, tab2, "Security Level: High (35 passes)" );
-
-				/*                                 0         1         2         3         4         5         6         7         8  */
-				mvwprintw( main_window, yy++, tab1, "This is the method described by Peter Gutmann in the paper entitled          " );
-				mvwprintw( main_window, yy++, tab1, "\"Secure Deletion of Data from Magnetic and Solid-State Memory\".            " );
-				break;
-
-			case 5:
-
-				mvwprintw( main_window, 2, tab2, "syslinux.cfg: nuke=\"dwipe --method random\"" );
-				mvwprintw( main_window, 3, tab2, "Security Level: Depends on Rounds" );
-
-				/*                                 0         1         2         3         4         5         6         7         8  */
-				mvwprintw( main_window, yy++, tab1, "This method fills the device with a stream from the PRNG. It is probably the " );
-				mvwprintw( main_window, yy++, tab1, "best method to use on modern hard disk drives because encoding schemes vary. " );
-				mvwprintw( main_window, yy++, tab1, "                                                                             " );
-				mvwprintw( main_window, yy++, tab1, "This method has a medium security level with 4 rounds, and a high security   " );
-				mvwprintw( main_window, yy++, tab1, "level with 8 rounds.                                                         " );
-				break;
-
-		} /* switch */
-
-		/* Add a border. */
-		box( main_window, 0, 0 );
-
-		/* Add a title. */
-		dwipe_gui_title( main_window, " Wipe Method ", 0 );
-
-		/* Refresh the window. */
-		wrefresh( main_window );
-
-		/* Get a keystroke. */
-		keystroke = getch();
-
-		switch( keystroke )
-		{
-			case KEY_DOWN:
-			case 'j':
-			case 'J':
-
-				if( focus < count -1 ) { focus += 1; } 
-				break;
-
-			case KEY_UP:
-			case 'k':
-			case 'K':
-
-				if( focus > 0 ) { focus -= 1; } 
-				break;
-
-			case KEY_BACKSPACE:
-			case KEY_BREAK:
-
-				return;
-
-		} /* switch */
-
-	} while( keystroke != KEY_ENTER && keystroke != ' ' && keystroke != 10 );
-
-	switch( focus )
-	{
-		case 0:
-			dwipe_options.method = &dwipe_zero;
-			break;
-
-		case 1:
-			dwipe_options.method = &dwipe_ops2;
-			break;
-
-		case 2:
-			dwipe_options.method = &dwipe_dodshort;
-			break;
-
-		case 3:
-			dwipe_options.method = &dwipe_dod522022m;
-			break;
-
-		case 4:
-			dwipe_options.method = &dwipe_gutmann;
-			break;
-
-		case 5:
-			dwipe_options.method = &dwipe_random;
-			break;
+		/* Apply the color change. */
+		wattron( win, COLOR_PAIR(7) );
 	}
 
+	/* Clear the window. */
+	werase( win );
+	/* Add a border. */
+	box(win, 0, 0);
 
+	wrefresh(win);
+
+		if( dwipe_options.method == &dwipe_zero       ) { focus = 0; }
+	if( dwipe_options.method == &dwipe_ops2       ) { focus = 1; }
+	if( dwipe_options.method == &dwipe_dodshort   ) { focus = 2; }
+	if( dwipe_options.method == &dwipe_dod522022m ) { focus = 3; }
+	if( dwipe_options.method == &dwipe_gutmann    ) { focus = 4; }
+	if( dwipe_options.method == &dwipe_random     ) { focus = 5; }
+	
+	struct dwipe_menu_items items[] = {
+			{1, dwipe_method_label(&dwipe_zero) },
+			{2, dwipe_method_label(&dwipe_ops2) },
+			{3, dwipe_method_label(&dwipe_dodshort) },
+			{4, dwipe_method_label(&dwipe_dod522022m) },
+			{5, dwipe_method_label(&dwipe_gutmann) },
+			{6, dwipe_method_label(&dwipe_random) },
+		};
+	int count = sizeof(items) / sizeof(items[0]); // Number of items
+
+
+	// Work out the longest line to pad others to match
+	int i = 0;
+	int longest = 0;
+	for (i = 0; i < count; i++) {
+		if (strlen(items[i].text) > longest) {
+			longest = strlen(items[i].text);
+		}
+	}
+	longest += 5; // Add a slight border
+
+	int tab1 = 5; // Starting column for menu
+	int row = 4; // Starting row for menu
+
+	bool breakLoop = false;
+	bool noSave = false;
+
+	while (!breakLoop) {
+		int help_row = 12; // Starting row for help
+
+		werase(win);
+		dwipe_gui_title(win, "Wipe Method", 1);
+
+		int i = 0;
+		for (i = 0; i < count; i++) {
+			if (focus == i) wattron(win, selected_item);
+			mvwprintw(win, row + i, tab1, "%d) %s%*s", items[i].number, items[i].text, (longest - strlen(items[i].text)), " ");
+			if (focus == i) wattron(win, normal_item);
+		}
+
+		switch (focus) {
+			case 0:
+				mvwprintw(win, help_row++, tab1, "syslinux.cfg: nuke=\"dwipe --method zero\"");
+				mvwprintw(win, help_row++, tab1, "Security Level: Low (1 pass)");
+				help_row++;
+				mvwprintw(win, help_row++, tab1, "This method fills the device with zeros. Note that the rounds option does");
+				mvwprintw(win, help_row++, tab1, "not apply to this method. This method always runs one round.");
+				help_row++;
+				mvwprintw(win, help_row++, tab1, "Use this method to blank disks before internal redeployment, or before");
+				mvwprintw(win, help_row++, tab1, "reinstalling Microsoft Windows to remove the data areas that the format");
+				mvwprintw(win, help_row++, tab1, "utility preserves.");
+			break;
+			case 1:
+				mvwprintw(win, help_row++, tab1, "syslinux.cfg: nuke=\"dwipe --method ops2\"" );
+				mvwprintw(win, help_row++, tab1, "Security Level: Medium (8 passes)" );
+				help_row++;
+				mvwprintw(win, help_row++, tab1, "The Royal Canadian Mounted Police Technical Security Standard for            " );
+				mvwprintw(win, help_row++, tab1, "Information Technology, Appendix OPS-II: Media Sanitization.                 " );
+				help_row++;
+				mvwprintw(win, help_row++, tab1, "This implementation, with regards to paragraph 2 section A of the standard,");
+				mvwprintw(win, help_row++, tab1, "uses a pattern that is one random byte and that is changed each round.");
+			break;
+			case 2:
+				mvwprintw(win, help_row++, tab1, "syslinux.cfg: nuke=\"dwipe --method dodshort\"");
+				mvwprintw(win, help_row++, tab1, "Security Level: Medium (3 passes)");
+				help_row++;
+				mvwprintw(win, help_row++, tab1, "The American Department of Defense 5220.22-M short wipe.");
+				mvwprintw(win, help_row++, tab1, "This method is composed of passes 1,2,7 from the standard wipe.");
+			break;
+			case 3:
+				mvwprintw(win, help_row++, tab1, "syslinux.cfg: nuke=\"dwipe --method dod522022m\"");
+				mvwprintw(win, help_row++, tab1, "Security Level: Medium (7 passes)");
+				help_row++;
+				mvwprintw(win, help_row++, tab1, "The American Department of Defense 5220.22-M standard wipe.");
+				mvwprintw(win, help_row++, tab1, "This implementation uses the same algorithm as the Heidi Eraser product.");
+			break;
+			case 4:
+				mvwprintw(win, help_row++, tab1, "syslinux.cfg: nuke=\"dwipe --method gutmann\"");
+				mvwprintw(win, help_row++, tab1, "Security Level: High (35 passes)");
+				help_row++;
+				mvwprintw(win, help_row++, tab1, "This is the method described by Peter Gutmann in the paper entitled");
+				mvwprintw(win, help_row++, tab1, "\"Secure Deletion of Data from Magnetic and Solid-State Memory\".");
+			break;
+			case 5:
+				mvwprintw(win, help_row++, tab1, "syslinux.cfg: nuke=\"dwipe --method random\"" );
+				mvwprintw(win, help_row++, tab1, "Security Level: Depends on Rounds" );
+				help_row++;
+				mvwprintw(win, help_row++, tab1, "This method fills the device with a stream from the PRNG. It is probably the");
+				mvwprintw(win, help_row++, tab1, "best method to use on modern hard disk drives because encoding schemes vary.");
+				help_row++;
+				mvwprintw(win, help_row++, tab1, "This method has a medium security level with 4 rounds, and a high security");
+				mvwprintw(win, help_row++, tab1, "level with 8 rounds.");
+			break;
+		}
+
+		/* Refresh Window */
+		wrefresh(win);
+
+		keystroke = getch();
+		switch (keystroke) {
+			case KEY_BACKSPACE:
+			case 127:
+			case 27: // Escape
+				breakLoop = true;
+				noSave = true;
+			break;
+			case KEY_DOWN:
+			case 'k':
+			case 'K':
+				if (focus < count - 1) focus++;
+				else focus = 0;
+			break;
+			case KEY_UP:
+			case 'j':
+			case 'J':
+				if (focus > 0) focus--;
+				else focus = count - 1;
+			break;
+			case KEY_ENTER:
+			case ' ':
+			case 10: {
+				int i = 0;
+				for (i = 0; i < count; i++) {
+					if (focus == i) {
+						breakLoop = true;
+					}
+				}
+			}
+			break;
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+				focus = keystroke - '0' - 1;
+				//breakLoop = true;
+			break;
+		}
+	}
+
+	if (!noSave) {
+		switch (focus) {
+			case 0:
+				dwipe_options.method = &dwipe_zero;
+			break;
+			case 1:
+				dwipe_options.method = &dwipe_ops2;
+			break;
+			case 2:
+				dwipe_options.method = &dwipe_dodshort;
+			break;
+			case 3:
+				dwipe_options.method = &dwipe_dod522022m;
+			break;
+			case 4:
+				dwipe_options.method = &dwipe_gutmann;
+			break;
+			case 5:
+				dwipe_options.method = &dwipe_random;
+			break;
+		}
+	}
+
+	werase(win);
+	delwin(win);
 } /* dwipe_gui_method */
 
 
