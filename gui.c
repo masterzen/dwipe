@@ -183,6 +183,9 @@ void dwipe_gui_init( void )
 	/* Enable most special keys. */
 	keypad( stdscr, TRUE );
 
+	/* Lower escape key delay */
+	set_escdelay(25);
+
 	if( has_colors() )
 	{
 		/* Initialize color capabilities. */
