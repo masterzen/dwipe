@@ -127,6 +127,12 @@
 #define DWIPE_GUI_METHOD_Y (LINES - DWIPE_GUI_METHOD_H) / 2
 #define DWIPE_GUI_METHOD_X (COLS - DWIPE_GUI_METHOD_W) / 2
 
+/* Round count window: width, height, x coordinate, y coordinate */
+#define DWIPE_GUI_ROUNDS_H 12
+#define DWIPE_GUI_ROUNDS_W 80
+#define DWIPE_GUI_ROUNDS_Y (LINES - DWIPE_GUI_ROUNDS_H) / 2
+#define DWIPE_GUI_ROUNDS_X (COLS - DWIPE_GUI_ROUNDS_W) / 2
+
 
 /* Window pointers. */
 WINDOW* footer_window;
@@ -144,8 +150,8 @@ const char* options_title = " Options ";
 const char* stats_title = " Statistics ";
 
 /* Footer labels. */
-const char* dwipe_buttons1 = " C=Configuration, J=Up K=Down Space=Select Escape=Back, F10=Start ";
-const char* dwipe_buttons2 = " J=Up K=Down Space=Select";
+const char* dwipe_buttons1 = " C=Configuration, J=Up K=Down Space=Select, F10=Start ";
+const char* dwipe_buttons2 = " J=Up K=Down Space=Select Escape=Cancel";
 
 
 
@@ -845,74 +851,99 @@ void dwipe_gui_rounds( void )
  * Allows the user to change the rounds option.
  *
  * @modifies  dwipe_options.rounds
- * @modifies  main_window
  *
  */
+
+	int keystroke;
+
+	/* Create Window */
+	WINDOW* win;
+
+	win = newwin( DWIPE_GUI_ROUNDS_H, DWIPE_GUI_ROUNDS_W, DWIPE_GUI_ROUNDS_Y, DWIPE_GUI_ROUNDS_X );
 
 	/* Set the initial focus. */
 	int focus = dwipe_options.rounds;
 
-	/* The first tabstop. */
-	const int tab1 = 2;
+	/* Max rounds allowed */
+	int focus_max = 10000;
 
-	/* The current working row. */
-	int yy;
-
-	/* Input buffer. */
-	int keystroke;
-
-	/* Erase the footer window. */
-	werase( footer_window );
-	wrefresh( footer_window );
-
-
-	do
+	if( has_colors() )
 	{
-		/* Erase the main window. */
-		werase( main_window );
+		/* Set the background style. */
+		wbkgdset( win, COLOR_PAIR(7) | ' ' );
 
-		/* Add a border. */
-		box( main_window, 0, 0 );
+		/* Apply the color change. */
+		wattron( win, COLOR_PAIR(7) );
+	}
 
-		/* Add a title. */
-		dwipe_gui_title( main_window, " Rounds ", 0 );
+	/* Clear the window. */
+	werase( win );
+	/* Add a border. */
+	box(win, 0, 0);
 
-		/* Initialize the working row. */
-		yy = 4;
+	wrefresh(win);
 
-		/*                               0         1         2         3         4         5         6         7   */
-		mvwprintw( main_window, yy++, tab1, "This is the number of times to run the wipe method on each device."  );
-		mvwprintw( main_window, yy++, tab1, ""  );
+	int tab1 = 5; // Starting column for menu
+	int row = 4; // Starting row for menu
 
-		if( focus > 0 )
-		{	
+
+	bool breakLoop = false;
+	bool noSave = false;
+
+	curs_set(1);
+	while (!breakLoop) {
+		int help_row = 6; // Starting row for help
+
+		werase(win);
+		dwipe_gui_title(win, "Number of Rounds", 1);
+
+		mvwprintw(win, help_row++, tab1, "This is the number of times to run the wipe method on each device.");
+		help_row++;
+		if (focus > 0) {
 			/* Print the syslinux configuration hint. */
-			mvwprintw( main_window, yy++, tab1, "syslinux.cfg:  nuke=\"dwipe --rounds %i\"", focus );
+			mvwprintw(win, help_row++, tab1, "syslinux.cfg:  nuke=\"dwipe --rounds %d\"", focus);
 
 			/* Print this line last so that the cursor is in the right place. */
-			mvwprintw( main_window, 2, tab1, "> %i", focus );
-		}
-
-		else
-		{
-			mvwprintw( main_window, yy++, tab1, "The number of rounds must be a non-negative integer." );
+			mvwprintw(win, row, tab1, "> %d", focus);
+		} else {
+			mvwprintw(win, help_row++, tab1, "The number of rounds must be a non-negative integer.");
 
 			/* Print this line last so that the cursor is in the right place. */
-			mvwprintw( main_window, 2, tab1, "> " );
+			mvwprintw(win, row, tab1, "> ");
 		}
 
-		/* Reveal the cursor. */
-		curs_set( 1 );
+		/* Refresh Window */
+		wrefresh(win);
 
-		/* Refresh the window. */
-		wrefresh( main_window );
-
-		/* Get a keystroke. */
 		keystroke = getch();
-
-		switch( keystroke )
-		{
-			case '0':
+		switch (keystroke) {
+			case 27: // Escape
+				breakLoop = true;
+				noSave = true;
+			break;
+			case KEY_DOWN:
+			case 'k':
+			case 'K':
+				if (focus > 1) focus--;
+			break;
+			case KEY_UP:
+			case 'j':
+			case 'J':
+				if (focus < focus_max) focus++;
+			break;
+			case KEY_ENTER:
+			case ' ':
+			case 10:
+				if (focus > 0) {
+					breakLoop = true;
+				}
+			break;
+			case KEY_LEFT:
+			case KEY_BACKSPACE:
+			case 127:
+				/* Right shift, base ten. */
+				focus /= 10;
+			break;
 			case '1':
 			case '2':
 			case '3':
@@ -922,40 +953,27 @@ void dwipe_gui_rounds( void )
 			case '7':
 			case '8':
 			case '9':
+			case '0':
+				/* Left shift, base ten. */
+				focus *= 10;
 
-				if( focus < 100000000 )
-				{
-					/* Left shift, base ten. */
-					focus *= 10;
+				/* Add new input */
+				focus += keystroke - '0';
 
-					/* This assumes ASCII input, where the zero character is 0x30. */
-					focus += keystroke - 48;
+				if (focus > focus_max) {
+					focus = focus_max;
 				}
+			break;
+		}
+	}
 
-				break;
-
-			case KEY_BACKSPACE:
-			case KEY_LEFT:
-			case 127:
-
-				/* Right shift, base ten. */
-				focus /= 10;
-
-				break;
-
-		} /* switch keystroke */
-
-		/* Hide the cursor. */
-		curs_set( 0 );
-
-	} while( keystroke != 10 );
-
-	if( focus > 0 )
-	{
-		/* Set the number of rounds. */
+	if (!noSave) {
 		dwipe_options.rounds = focus;
 	}
 
+	werase(win);
+	delwin(win);
+	curs_set(0);
 } /* dwipe_guid_rounds */
 
 
@@ -1294,6 +1312,11 @@ void dwipe_gui_configuration( void )
 	int row = 4; // Starting row for menu
 	int focus = -1; // Currently selected item
 	int count = sizeof(items) / sizeof(items[0]); // Number of items
+
+	/* Change footer to menu keys */
+	werase(footer_window);
+	dwipe_gui_title(footer_window, dwipe_buttons2, 0);
+	wrefresh(footer_window);
 
 	do {
 		werase(config_window);
