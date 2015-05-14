@@ -122,7 +122,7 @@
 #define DWIPE_GUI_PRNG_X (COLS - DWIPE_GUI_PRNG_W) / 2
 
 /* Method selection window: width, height, x coordinate, y coordinate */
-#define DWIPE_GUI_METHOD_H 24
+#define DWIPE_GUI_METHOD_H 22
 #define DWIPE_GUI_METHOD_W 85
 #define DWIPE_GUI_METHOD_Y (LINES - DWIPE_GUI_METHOD_H) / 2
 #define DWIPE_GUI_METHOD_X (COLS - DWIPE_GUI_METHOD_W) / 2
