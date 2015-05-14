@@ -116,8 +116,8 @@
 #define DWIPE_GUI_VERIFY_X (COLS - DWIPE_GUI_VERIFY_W) / 2
 
 /* PRNG settings window: width, height, x coordinate, y coordinate */
-#define DWIPE_GUI_PRNG_H 20
-#define DWIPE_GUI_PRNG_W 80
+#define DWIPE_GUI_PRNG_H 17
+#define DWIPE_GUI_PRNG_W 75
 #define DWIPE_GUI_PRNG_Y (LINES - DWIPE_GUI_PRNG_H) / 2
 #define DWIPE_GUI_PRNG_X (COLS - DWIPE_GUI_PRNG_W) / 2
 
@@ -1046,7 +1046,7 @@ void dwipe_gui_prng( void )
 	bool noSave = false;
 
 	while (!breakLoop) {
-		int help_row = 10; // Starting row for help
+		int help_row = 8; // Starting row for help
 
 		werase(win);
 		dwipe_gui_title(win, "Pseudo Random Number Generator", 1);
