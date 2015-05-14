@@ -129,7 +129,7 @@
 
 /* Round count window: width, height, x coordinate, y coordinate */
 #define DWIPE_GUI_ROUNDS_H 12
-#define DWIPE_GUI_ROUNDS_W 80
+#define DWIPE_GUI_ROUNDS_W 76
 #define DWIPE_GUI_ROUNDS_Y (LINES - DWIPE_GUI_ROUNDS_H) / 2
 #define DWIPE_GUI_ROUNDS_X (COLS - DWIPE_GUI_ROUNDS_W) / 2
 
