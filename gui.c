@@ -140,7 +140,6 @@ WINDOW* header_window;
 WINDOW* main_window;
 WINDOW* options_window;
 WINDOW* stats_window;
-WINDOW* config_window;
 
 
 /* Options window title. */
@@ -358,7 +357,6 @@ void dwipe_gui_free( void )
 	delwin( main_window    );
 	delwin( options_window );
 	delwin( stats_window   );
-	delwin( config_window  );
 	endwin();
 
 } /* dwipe_gui_free */
@@ -721,6 +719,7 @@ void dwipe_gui_select( int count, dwipe_context_t* c )
 			
 				/*  Run the method dialog. */
 				dwipe_gui_method();
+				refresh_all_windows();
 				break;
 
 			case 'p':
@@ -728,6 +727,7 @@ void dwipe_gui_select( int count, dwipe_context_t* c )
 
 				/* Run the PRNG dialog. */
 				dwipe_gui_prng();
+				refresh_all_windows();
 				break;
 
 			case 'r':
@@ -735,6 +735,7 @@ void dwipe_gui_select( int count, dwipe_context_t* c )
 
 				/* Run the rounds dialog. */
 				dwipe_gui_rounds();
+				refresh_all_windows();
 				break;
 
 			case 'v':
@@ -742,6 +743,7 @@ void dwipe_gui_select( int count, dwipe_context_t* c )
 
 				/* Run the option dialog. */
 				dwipe_gui_verify();
+				refresh_all_windows();
 				break;
 			case 'f':
 			case 'F':
@@ -974,7 +976,7 @@ void dwipe_gui_rounds( void )
 	werase(win);
 	delwin(win);
 	curs_set(0);
-} /* dwipe_guid_rounds */
+} /* dwipe_gui_rounds */
 
 
 
@@ -1277,7 +1279,7 @@ void dwipe_gui_verify( void )
 void dwipe_gui_configuration( void )
 {
 	/* Create the configuration menu */
-	config_window = newwin( DWIPE_GUI_CONFIG_H, DWIPE_GUI_CONFIG_W, DWIPE_GUI_CONFIG_Y, DWIPE_GUI_CONFIG_X );
+	WINDOW* config_window = newwin( DWIPE_GUI_CONFIG_H, DWIPE_GUI_CONFIG_W, DWIPE_GUI_CONFIG_Y, DWIPE_GUI_CONFIG_X );
 
 	if( has_colors() )
 	{
@@ -1431,7 +1433,7 @@ void dwipe_gui_method( void )
 
 	wrefresh(win);
 
-		if( dwipe_options.method == &dwipe_zero       ) { focus = 0; }
+	if( dwipe_options.method == &dwipe_zero       ) { focus = 0; }
 	if( dwipe_options.method == &dwipe_ops2       ) { focus = 1; }
 	if( dwipe_options.method == &dwipe_dodshort   ) { focus = 2; }
 	if( dwipe_options.method == &dwipe_dod522022m ) { focus = 3; }
@@ -2049,9 +2051,6 @@ void refresh_all_windows() {
 
 	touchwin(main_window);
 	wrefresh(main_window);
-
-	touchwin(config_window);
-	wrefresh(config_window);
 
 	touchwin(footer_window);
 	wrefresh(footer_window);
