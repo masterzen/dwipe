@@ -123,7 +123,7 @@
 
 /* Method selection window: width, height, x coordinate, y coordinate */
 #define DWIPE_GUI_METHOD_H 22
-#define DWIPE_GUI_METHOD_W 85
+#define DWIPE_GUI_METHOD_W 80
 #define DWIPE_GUI_METHOD_Y (LINES - DWIPE_GUI_METHOD_H) / 2
 #define DWIPE_GUI_METHOD_X (COLS - DWIPE_GUI_METHOD_W) / 2
 
@@ -1461,7 +1461,7 @@ void dwipe_gui_method( void )
 	}
 	longest += 5; // Add a slight border
 
-	int tab1 = 5; // Starting column for menu
+	int tab1 = 3; // Starting column for menu
 	int row = 4; // Starting row for menu
 
 	bool breakLoop = false;
