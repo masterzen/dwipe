@@ -525,14 +525,20 @@ int main( int argc, char** argv )
 
 		if( c1[i].result == 0 )
 		{
-			dwipe_log( DWIPE_LOG_NOTICE, "Wipe of device '%s' succeeded.", c1[i].device_name );
 			fprintf( dwipe_result_fp, "DWIPE_RESULT='pass'\n" );
+			if (c1[i].verify_errors > 0) {
+				dwipe_log( DWIPE_LOG_NOTICE, "Wipe of device '%s' succeeded (verification failed).", c1[i].device_name );
+				fprintf( dwipe_result_fp, "DWIPE_VERIFY_RESULT='fail'\n" );
+			} else {
+				dwipe_log( DWIPE_LOG_NOTICE, "Wipe of device '%s' succeeded.", c1[i].device_name );
+				fprintf( dwipe_result_fp, "DWIPE_VERIFY_RESULT='pass'\n" );
+			}
 		}
 
 		if( c1[i].result > 0 || c1[i].signal)
 		{
 			dwipe_log( DWIPE_LOG_NOTICE, "Wipe of device '%s' incomplete.", c1[i].device_name );
-			fprintf( dwipe_result_fp, "DWIPE_RESULT='fail'\n" );
+			fprintf( dwipe_result_fp, "DWIPE_RESULT='incomplete'\n" );
 		}
 		
 		fclose( dwipe_result_fp );
