@@ -526,8 +526,8 @@ void dwipe_gui_select( int count, dwipe_context_t* c )
 		switch( keystroke )
 		{
 			case KEY_DOWN:
-			case 'j':
-			case 'J':
+			case 'k':
+			case 'K':
 
 				/* Increment the focus. */
 				focus += 1;
@@ -549,8 +549,8 @@ void dwipe_gui_select( int count, dwipe_context_t* c )
 				break;
 
 			case KEY_UP:
-			case 'k':
-			case 'K':
+			case 'j':
+			case 'J':
 
 				/* Decrement the focus. */
 				focus -= 1;
