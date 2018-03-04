@@ -767,7 +767,7 @@ void dwipe_gui_select( int count, dwipe_context_t* c )
 			};
 		}
 
-	} while( keystroke != KEY_F(10) || selected == 0 );
+	} while( (keystroke != KEY_F(10) && keystroke != 'z' && keystroke != 'Z') || selected == 0 );
 
 	/* Clear the main window. */
 	werase( main_window );
